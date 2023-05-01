@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request\Response;
 
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
+use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
 final class LatestRates
@@ -26,26 +22,26 @@ final class LatestRates
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
+     * @throws RequestServiceException
      */
     public static function createFromResponse(ResponseInterface $response): self
     {
-        $responseArray = $response->toArray();
-        $rates = [];
+        try {
+            $responseArray = $response->toArray();
+            $rates = [];
 
-        foreach ($responseArray['rates'] as $currency => $rate) {
-            $rates[] = new Rate(CurrencyCode::from($currency), $rate);
+            foreach ($responseArray['rates'] as $currency => $rate) {
+                $rates[] = new Rate(CurrencyCode::from($currency), $rate);
+            }
+
+            return new self(
+                CurrencyCode::from($responseArray['base']),
+                new \DateTimeImmutable($responseArray['date']),
+                $rates
+            );
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext('LatestRates', $e);
         }
-
-        return new self(
-            CurrencyCode::from($responseArray['base']),
-            \DateTimeImmutable::createFromFormat('Y-m-d', $responseArray['date']),
-            $rates
-        );
     }
 
     public function getBaseCurrency(): CurrencyCode

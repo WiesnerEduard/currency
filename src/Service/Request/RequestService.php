@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request;
 
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -25,27 +22,28 @@ class RequestService
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
+     * @throws RequestServiceException
      */
     public function makeRequest(string $path = '', QueryParameters $parameters = null): ResponseInterface
     {
-        return $this->client->request('GET', sprintf('%s/%s', $this->server->value, $path), $parameters?->getQuery());
+        try {
+            return $this->client->request('GET', sprintf('%s/%s', $this->server->value, $path), $parameters?->getQuery());
+        } catch (TransportExceptionInterface $e) {
+            throw RequestServiceException::create('makeRequest', $e);
+        }
     }
 
     /**
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws RequestServiceException
      */
     public function getLatestRates(QueryParameters $parameters = null, bool $rawResponse = false): LatestRates|array
     {
         if ($rawResponse) {
-            return $this->makeRequest(self::LATEST_PATH, $parameters)->toArray();
+            try {
+                return $this->makeRequest(self::LATEST_PATH, $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getLatestRates', $e);
+            }
         }
 
         return LatestRates::createFromResponse($this->makeRequest(self::LATEST_PATH, $parameters));
