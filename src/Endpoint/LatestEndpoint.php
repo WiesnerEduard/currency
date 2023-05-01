@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Endpoint;
 
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Wiesner\Currency\Service\Request\Enum\BankSource;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
 use Wiesner\Currency\Service\Request\RequestService;
+use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\LatestRates;
 
 class LatestEndpoint
@@ -27,11 +23,7 @@ class LatestEndpoint
     /**
      * @param CurrencyCode[] $symbols
      *
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws RequestServiceException
      */
     public function getRates(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): LatestRates
     {
@@ -41,11 +33,7 @@ class LatestEndpoint
     /**
      * @param CurrencyCode[] $symbols
      *
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws RequestServiceException
      */
     public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
     {
