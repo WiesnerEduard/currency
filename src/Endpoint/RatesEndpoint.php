@@ -23,8 +23,6 @@ use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
  * RatesEndpoint class also offers historical data, allowing users to view and analyze past trends in currency exchange rates.
  * This feature can be particularly useful for businesses or individuals who need to track currency fluctuations over time,
  * such as when making long-term financial plans or analyzing historical trends.
- *
- * @api
  */
 class RatesEndpoint
 {
@@ -50,6 +48,8 @@ class RatesEndpoint
      *
      * @uses self::$defaultCurrency
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getRates(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
@@ -71,6 +71,8 @@ class RatesEndpoint
      *
      * @uses self::$defaultCurrency
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -91,6 +93,8 @@ class RatesEndpoint
      * @throws RequestServiceException
      *
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getRate(CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
@@ -113,6 +117,8 @@ class RatesEndpoint
      *
      * @uses self::$defaultCurrency
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getHistoricalRates(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
@@ -135,6 +141,8 @@ class RatesEndpoint
      *
      * @uses self::$defaultCurrency
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -156,6 +164,8 @@ class RatesEndpoint
      * @throws RequestServiceException
      *
      * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getHistoricalRate(\DateTimeImmutable $toDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
@@ -163,9 +173,24 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve timeseries currency exchange rates.
+     *
+     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable  $startDate the start date of your preferred timeframe
+     * @param \DateTimeImmutable  $endDate   the end date of your preferred timeframe
+     * @param CurrencyCode|null   $base      currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols   array of currencies used to filter response
+     * @param float|null          $amount    the amount to be converted from base currency
+     * @param int|null            $places    round numbers to decimal place
+     * @param BankSource|null     $source    source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getTimeSeriesRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): TimeSeriesRates
     {
@@ -177,9 +202,24 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve timeseries currency exchange rates as array.
+     *
+     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable  $startDate the start date of your preferred timeframe
+     * @param \DateTimeImmutable  $endDate   the end date of your preferred timeframe
+     * @param CurrencyCode|null   $base      currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols   array of currencies used to filter response
+     * @param float|null          $amount    the amount to be converted from base currency
+     * @param int|null            $places    round numbers to decimal place
+     * @param BankSource|null     $source    source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getTimeSeriesRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -192,7 +232,23 @@ class RatesEndpoint
     }
 
     /**
+     * Retrieve timeseries currency exchange rate for single currency.
+     *
+     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable $startDate the start date of your preferred timeframe
+     * @param \DateTimeImmutable $endDate   the end date of your preferred timeframe
+     * @param CurrencyCode       $base      currency used to calculate rate from
+     * @param CurrencyCode       $to        currency used to calculate rate to
+     * @param float|null         $amount    the amount to be converted from base currency
+     * @param int|null           $places    round numbers to decimal place
+     * @param BankSource|null    $source    source institution that provide rates
+     *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getTimeSeriesRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
