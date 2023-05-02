@@ -9,8 +9,11 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
 use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
+use Wiesner\Currency\Service\Request\Response\FluctuationRates;
 use Wiesner\Currency\Service\Request\Response\Rates;
 use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
+use Wiesner\Currency\Service\Request\Response\ValueObject\FluctuationRate;
+use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
 class RatesEndpoint
 {
@@ -26,7 +29,7 @@ class RatesEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getRates(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): Rates
+    public function getRates(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
         return $this->requestService->getLatestRates($this->createQueryParameters($base, $symbols, $amount, $places, $source));
     }
@@ -36,9 +39,17 @@ class RatesEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
+    public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getLatestRates($this->createQueryParameters($base, $symbols, $amount, $places, $source), true);
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getRate(CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
+    {
+        return $this->getRates($base, [$to], $amount, $places, $source)->getRate($to);
     }
 
     /**
@@ -46,7 +57,7 @@ class RatesEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getHistoricalRates(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): Rates
+    public function getHistoricalRates(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
         return $this->requestService->getHistoricalRates($toDate, $this->createQueryParameters($base, $symbols, $amount, $places, $source));
     }
@@ -56,22 +67,30 @@ class RatesEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
+    public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getHistoricalRates($toDate, $this->createQueryParameters($base, $symbols, $amount, $places, $source), true);
     }
 
     /**
+     * @throws RequestServiceException
+     */
+    public function getHistoricalRate(\DateTimeImmutable $toDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
+    {
+        return $this->getHistoricalRates($toDate, $base, [$to], $amount, $places, $source)->getRate($to);
+    }
+
+    /**
      * @param CurrencyCode[] $symbols
      *
      * @throws RequestServiceException
      */
-    public function getTimeSeriesRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): TimeSeriesRates
+    public function getTimeSeriesRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): TimeSeriesRates
     {
         return $this->requestService->getTimeSeriesRates(
-            $this->createQueryParameters($base, $symbols, $amount, $places, $source)
-                ->add('start_date', $startDate->format('Y-m-d'))
-                ->add('end_date', $endDate->format('Y-m-d'))
+            startDate: $startDate,
+            endDate: $endDate,
+            parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source)
         );
     }
 
@@ -80,24 +99,67 @@ class RatesEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getTimeSeriesRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
+    public function getTimeSeriesRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getTimeSeriesRates(
-            $this->createQueryParameters($base, $symbols, $amount, $places, $source)
-                ->add('start_date', $startDate->format('Y-m-d'))
-                ->add('end_date', $endDate->format('Y-m-d')),
-            true
+            startDate: $startDate,
+            endDate: $endDate,
+            parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source),
+            rawResponse: true
+        );
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getTimeSeriesRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
+    {
+        return $this->getTimeSeriesRates($startDate, $endDate, $base, [$to], $amount, $places, $source)->getRate($to);
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
+     */
+    public function getFluctuationRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): FluctuationRates
+    {
+        return $this->requestService->getFluctuationRates(
+            baseCurrency: $base ?: $this->defaultCurrency,
+            parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source)
         );
     }
 
     /**
      * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
      */
-    protected function createQueryParameters(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): QueryParameters
+    public function getFluctuationRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
+    {
+        return $this->requestService->getFluctuationRates(
+            baseCurrency: $base ?: $this->defaultCurrency,
+            parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source),
+            rawResponse: true
+        );
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getFluctuationRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): FluctuationRate
+    {
+        return $this->getFluctuationRates($startDate, $endDate, $base, [$to], $amount, $places, $source)->getFluctuationRate($to);
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     */
+    protected function createQueryParameters(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): QueryParameters
     {
         return (new QueryParameters())
-            ->add('base', (null === $base) ? $this->defaultCurrency->value : $base->value)
-            ->add('source', (null === $source) ? $this->defaultBankSource->value : $source->value)
+            ->add('base', ($base ?: $this->defaultCurrency)->value)
+            ->add('source', ($source ?: $this->defaultBankSource)->value)
             ->add('symbols', (null === $symbols) ? CurrencyCode::getAllValues() : CurrencyCode::getValuesOfCollection($symbols))
             ->add('places', $places)
             ->add('amount', $amount);

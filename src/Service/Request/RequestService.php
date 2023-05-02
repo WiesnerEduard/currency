@@ -8,8 +8,10 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\Enum\Server;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
+use Wiesner\Currency\Service\Request\Response\FluctuationRates;
 use Wiesner\Currency\Service\Request\Response\Rates;
 use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
 
@@ -17,6 +19,7 @@ class RequestService
 {
     private const LATEST_PATH = 'latest';
     private const TIME_SERIES_PATH = 'timeseries';
+    private const FLUCTUATION_PATH = 'fluctuation';
     private const CONVERT_PATH = 'convert';
 
     public function __construct(
@@ -72,8 +75,12 @@ class RequestService
     /**
      * @throws RequestServiceException
      */
-    public function getTimeSeriesRates(QueryParameters $parameters = null, bool $rawResponse = false): TimeSeriesRates|array
+    public function getTimeSeriesRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, QueryParameters $parameters = null, bool $rawResponse = false): TimeSeriesRates|array
     {
+        $parameters = ($parameters ?: new QueryParameters())
+            ->add('start_date', $startDate->format('Y-m-d'))
+            ->add('end_date', $endDate->format('Y-m-d'));
+
         if ($rawResponse) {
             try {
                 $this->makeRequest(self::TIME_SERIES_PATH, $parameters)->toArray();
@@ -83,6 +90,24 @@ class RequestService
         }
 
         return TimeSeriesRates::createFromResponse($this->makeRequest(self::TIME_SERIES_PATH, $parameters));
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getFluctuationRates(CurrencyCode $baseCurrency, QueryParameters $parameters = null, bool $rawResponse = false): FluctuationRates|array
+    {
+        $parameters = ($parameters ?: new QueryParameters())->add('base', $baseCurrency->value);
+
+        if ($rawResponse) {
+            try {
+                $this->makeRequest(self::FLUCTUATION_PATH, $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getFluctuationRates', $e);
+            }
+        }
+
+        return FluctuationRates::createFromResponseAndBaseCurrency($this->makeRequest(self::FLUCTUATION_PATH, $parameters), $baseCurrency);
     }
 
     /**
