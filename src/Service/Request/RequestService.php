@@ -97,9 +97,12 @@ class RequestService
     /**
      * @throws RequestServiceException
      */
-    public function getFluctuationRates(CurrencyCode $baseCurrency, QueryParameters $parameters = null, bool $rawResponse = false): FluctuationRates|array
+    public function getFluctuationRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $baseCurrency, QueryParameters $parameters = null, bool $rawResponse = false): FluctuationRates|array
     {
-        $parameters = ($parameters ?: new QueryParameters())->add('base', $baseCurrency->value);
+        $parameters = ($parameters ?: new QueryParameters())
+            ->add('base', $baseCurrency->value)
+            ->add('start_date', $startDate->format('Y-m-d'))
+            ->add('end_date', $endDate->format('Y-m-d'));
 
         if ($rawResponse) {
             try {

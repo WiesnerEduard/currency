@@ -256,13 +256,30 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve timeseries currency exchange rates.
+     *
+     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable  $startDate the start date of your preferred fluctuation timeframe
+     * @param \DateTimeImmutable  $endDate   the end date of your preferred fluctuation timeframe
+     * @param CurrencyCode|null   $base      currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols   array of currencies used to filter response
+     * @param float|null          $amount    the amount to be converted from base currency
+     * @param int|null            $places    round numbers to decimal place
+     * @param BankSource|null     $source    source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getFluctuationRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): FluctuationRates
     {
         return $this->requestService->getFluctuationRates(
+            startDate: $startDate,
+            endDate: $endDate,
             baseCurrency: $base ?: $this->defaultCurrency,
             parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source)
         );
@@ -276,6 +293,8 @@ class RatesEndpoint
     public function getFluctuationRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getFluctuationRates(
+            startDate: $startDate,
+            endDate: $endDate,
             baseCurrency: $base ?: $this->defaultCurrency,
             parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source),
             rawResponse: true
@@ -293,7 +312,7 @@ class RatesEndpoint
     /**
      * @param CurrencyCode[] $symbols
      */
-    protected function createQueryParameters(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): QueryParameters
+    private function createQueryParameters(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): QueryParameters
     {
         return (new QueryParameters())
             ->add('base', ($base ?: $this->defaultCurrency)->value)
