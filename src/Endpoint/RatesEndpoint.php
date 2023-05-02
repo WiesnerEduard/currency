@@ -234,7 +234,7 @@ class RatesEndpoint
     /**
      * Retrieve timeseries currency exchange rate for single currency.
      *
-     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     * Timeseries rate is for daily historical rate between two dates of your choice, with a maximum time frame of 366 days.
      *
      * @param \DateTimeImmutable $startDate the start date of your preferred timeframe
      * @param \DateTimeImmutable $endDate   the end date of your preferred timeframe
@@ -256,9 +256,9 @@ class RatesEndpoint
     }
 
     /**
-     * Retrieve timeseries currency exchange rates.
+     * Retrieve information about how currencies fluctuate on a day-to-day basis.
      *
-     * Timeseries rates are for daily historical rates between two dates of your choice, with a maximum time frame of 366 days.
+     * Fluctuation rates are for rates between two dates of your choice, with a maximum time frame of 366 days.
      *
      * @param \DateTimeImmutable  $startDate the start date of your preferred fluctuation timeframe
      * @param \DateTimeImmutable  $endDate   the end date of your preferred fluctuation timeframe
@@ -286,9 +286,24 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve information about how currencies fluctuate on a day-to-day basis as array.
+     *
+     * Fluctuation rates are for rates between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable  $startDate the start date of your preferred fluctuation timeframe
+     * @param \DateTimeImmutable  $endDate   the end date of your preferred fluctuation timeframe
+     * @param CurrencyCode|null   $base      currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols   array of currencies used to filter response
+     * @param float|null          $amount    the amount to be converted from base currency
+     * @param int|null            $places    round numbers to decimal place
+     * @param BankSource|null     $source    source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getFluctuationRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -302,7 +317,24 @@ class RatesEndpoint
     }
 
     /**
+     * Retrieve information about how currencies fluctuate on a day-to-day basis for single currency.
+     *
+     * Fluctuation rate is for rate between two dates of your choice, with a maximum time frame of 366 days.
+     *
+     * @param \DateTimeImmutable $startDate the start date of your preferred fluctuation timeframe
+     * @param \DateTimeImmutable $endDate   the end date of your preferred fluctuation timeframe
+     * @param CurrencyCode       $base      currency used to calculate rate from
+     * @param CurrencyCode       $to        currency used to calculate rate to
+     * @param float|null         $amount    the amount to be converted from base currency
+     * @param int|null           $places    round numbers to decimal place
+     * @param BankSource|null    $source    source institution that provide rates
+     *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
+     *
+     * @api
      */
     public function getFluctuationRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): FluctuationRate
     {
@@ -311,8 +343,10 @@ class RatesEndpoint
 
     /**
      * @param CurrencyCode[] $symbols
+     *
+     * @internal This method is not covered by the backward compatibility promise for wiesner/currency
      */
-    private function createQueryParameters(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): QueryParameters
+    protected function createQueryParameters(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): QueryParameters
     {
         return (new QueryParameters())
             ->add('base', ($base ?: $this->defaultCurrency)->value)
