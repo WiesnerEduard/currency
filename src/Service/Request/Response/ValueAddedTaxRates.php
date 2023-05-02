@@ -9,7 +9,7 @@ use Wiesner\Currency\Service\Request\Enum\CountryCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\ValueAddedTaxRate;
 
-final class ValueAddedTaxRates implements ResponseObjectInterface
+final class ValueAddedTaxRates
 {
     /**
      * @param ValueAddedTaxRate[] $taxRates

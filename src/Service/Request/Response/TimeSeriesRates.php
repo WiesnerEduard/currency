@@ -9,7 +9,7 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
-final class TimeSeriesRates implements ResponseObjectInterface
+final class TimeSeriesRates
 {
     /**
      * @param Rate[] $rates

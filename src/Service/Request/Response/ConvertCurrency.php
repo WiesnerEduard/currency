@@ -9,7 +9,7 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
-final class ConvertCurrency implements ResponseObjectInterface
+final class ConvertCurrency
 {
     private function __construct(
         private readonly CurrencyCode $from,
