@@ -7,15 +7,15 @@ namespace Wiesner\Currency\Service\Request\Response;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
+use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
 final class ConvertCurrency implements ResponseObjectInterface
 {
     private function __construct(
         private readonly CurrencyCode $from,
-        private readonly CurrencyCode $to,
         private readonly float $amount,
         private readonly float $result,
-        private readonly float $rate,
+        private readonly Rate $rate,
         private readonly \DateTimeImmutable $toDate,
         private readonly bool $historical
     ) {
@@ -31,10 +31,9 @@ final class ConvertCurrency implements ResponseObjectInterface
 
             return new self(
                 CurrencyCode::from($responseArray['query']['from']),
-                CurrencyCode::from($responseArray['query']['to']),
                 $responseArray['query']['amount'],
                 $responseArray['result'],
-                $responseArray['info']['rate'],
+                new Rate(CurrencyCode::from($responseArray['query']['to']), $responseArray['info']['rate']),
                 new \DateTimeImmutable($responseArray['date']),
                 $responseArray['historical']
             );
@@ -50,7 +49,7 @@ final class ConvertCurrency implements ResponseObjectInterface
 
     public function getTo(): CurrencyCode
     {
-        return $this->to;
+        return $this->rate->getCurrencyCode();
     }
 
     public function getAmount(): float
@@ -63,7 +62,7 @@ final class ConvertCurrency implements ResponseObjectInterface
         return $this->result;
     }
 
-    public function getRate(): float
+    public function getRate(): Rate
     {
         return $this->rate;
     }
