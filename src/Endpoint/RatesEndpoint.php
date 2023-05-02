@@ -9,9 +9,9 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
 use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
-use Wiesner\Currency\Service\Request\Response\LatestRates;
+use Wiesner\Currency\Service\Request\Response\Rates;
 
-class LatestEndpoint
+class RatesEndpoint
 {
     public function __construct(
         private readonly RequestService $requestService,
@@ -25,7 +25,7 @@ class LatestEndpoint
      *
      * @throws RequestServiceException
      */
-    public function getRates(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): LatestRates
+    public function getRates(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): Rates
     {
         return $this->requestService->getLatestRates($this->createQueryParameters($base, $symbols, $amount, $places, $source));
     }
@@ -38,6 +38,26 @@ class LatestEndpoint
     public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getLatestRates($this->createQueryParameters($base, $symbols, $amount, $places, $source), true);
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
+     */
+    public function getHistoricalRates(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): Rates
+    {
+        return $this->requestService->getHistoricalRates($toDate, $this->createQueryParameters($base, $symbols, $amount, $places, $source));
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
+     */
+    public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
+    {
+        return $this->requestService->getHistoricalRates($toDate, $this->createQueryParameters($base, $symbols, $amount, $places, $source), true);
     }
 
     /**

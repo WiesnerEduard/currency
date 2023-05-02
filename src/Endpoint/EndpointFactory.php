@@ -16,9 +16,9 @@ class EndpointFactory
     public const DEFAULT_CURRENCY = CurrencyCode::Eur;
     public const DEFAULT_BANK_SOURCE = BankSource::EuropeanCentralBank;
 
-    public static function latestEndpoint(Server $server = self::DEFAULT_SERVER, CurrencyCode $defaultCurrency = self::DEFAULT_CURRENCY, BankSource $source = self::DEFAULT_BANK_SOURCE): LatestEndpoint
+    public static function RatesEndpoint(Server $server = self::DEFAULT_SERVER, CurrencyCode $defaultCurrency = self::DEFAULT_CURRENCY, BankSource $source = self::DEFAULT_BANK_SOURCE): RatesEndpoint
     {
-        return new LatestEndpoint(static::createRequestService($server), $defaultCurrency, $source);
+        return new RatesEndpoint(static::createRequestService($server), $defaultCurrency, $source);
     }
 
     public static function ConvertCurrencyEndpoint(Server $server = self::DEFAULT_SERVER, BankSource $source = self::DEFAULT_BANK_SOURCE): ConvertCurrencyEndpoint

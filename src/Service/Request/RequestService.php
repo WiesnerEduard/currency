@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\Server;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
-use Wiesner\Currency\Service\Request\Response\LatestRates;
+use Wiesner\Currency\Service\Request\Response\Rates;
 
 class RequestService
 {
@@ -38,7 +38,7 @@ class RequestService
     /**
      * @throws RequestServiceException
      */
-    public function getLatestRates(QueryParameters $parameters = null, bool $rawResponse = false): LatestRates|array
+    public function getLatestRates(QueryParameters $parameters = null, bool $rawResponse = false): Rates|array
     {
         if ($rawResponse) {
             try {
@@ -48,7 +48,23 @@ class RequestService
             }
         }
 
-        return LatestRates::createFromResponse($this->makeRequest(self::LATEST_PATH, $parameters));
+        return Rates::createFromResponse($this->makeRequest(self::LATEST_PATH, $parameters));
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getHistoricalRates(\DateTimeImmutable $toDate, QueryParameters $parameters = null, bool $rawResponse = false): Rates|array
+    {
+        if ($rawResponse) {
+            try {
+                $this->makeRequest($toDate->format('Y-m-d'), $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getConvertCurrency', $e);
+            }
+        }
+
+        return Rates::createFromResponse($this->makeRequest($toDate->format('Y-m-d'), $parameters));
     }
 
     /**

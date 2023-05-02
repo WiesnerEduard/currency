@@ -9,7 +9,7 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
-final class LatestRates implements ResponseObjectInterface
+final class Rates implements ResponseObjectInterface
 {
     /**
      * @param Rate[] $rates
@@ -17,14 +17,15 @@ final class LatestRates implements ResponseObjectInterface
     private function __construct(
         private readonly CurrencyCode $baseCurrency,
         private readonly \DateTimeImmutable $updatedDate,
-        private readonly array $rates
+        private readonly array $rates,
+        private readonly bool $historical
     ) {
     }
 
     /**
      * @throws RequestServiceException
      */
-    public static function createFromResponse(ResponseInterface $response): LatestRates
+    public static function createFromResponse(ResponseInterface $response): Rates
     {
         try {
             $responseArray = $response->toArray();
@@ -37,7 +38,8 @@ final class LatestRates implements ResponseObjectInterface
             return new self(
                 CurrencyCode::from($responseArray['base']),
                 new \DateTimeImmutable($responseArray['date']),
-                $rates
+                $rates,
+                $responseArray['historical'] ?: false
             );
         } catch (\Throwable $e) {
             throw RequestServiceException::createInResponseContext('LatestRates', $e);
@@ -71,5 +73,10 @@ final class LatestRates implements ResponseObjectInterface
         }
 
         return null;
+    }
+
+    public function isHistorical(): bool
+    {
+        return $this->historical;
     }
 }
