@@ -14,6 +14,7 @@ use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 use Wiesner\Currency\Service\Request\Response\FluctuationRates;
 use Wiesner\Currency\Service\Request\Response\Rates;
 use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
+use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 
 class RequestService
 {
@@ -21,6 +22,7 @@ class RequestService
     private const TIME_SERIES_PATH = 'timeseries';
     private const FLUCTUATION_PATH = 'fluctuation';
     private const CONVERT_PATH = 'convert';
+    private const VAT_RATES_PATH = 'vat_rates';
 
     public function __construct(
         private readonly Server $server,
@@ -124,5 +126,21 @@ class RequestService
         }
 
         return ConvertCurrency::createFromResponse($this->makeRequest(self::CONVERT_PATH, $parameters));
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getValueAddedTaxRates(QueryParameters $parameters = null, bool $rawResponse = false): ValueAddedTaxRates|array
+    {
+        if ($rawResponse) {
+            try {
+                return $this->makeRequest(self::VAT_RATES_PATH, $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getConvertCurrency', $e);
+            }
+        }
+
+        return ValueAddedTaxRates::createFromResponse($this->makeRequest(self::VAT_RATES_PATH, $parameters));
     }
 }
