@@ -9,23 +9,23 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
-final class Rates implements ResponseObjectInterface
+final class TimeSeriesRates implements ResponseObjectInterface
 {
     /**
      * @param Rate[] $rates
      */
     private function __construct(
         private readonly CurrencyCode $baseCurrency,
-        private readonly \DateTimeImmutable $updatedDate,
-        private readonly array $rates,
-        private readonly bool $historical
+        private readonly \DateTimeImmutable $startDate,
+        private readonly \DateTimeImmutable $endDate,
+        private readonly array $rates
     ) {
     }
 
     /**
      * @throws RequestServiceException
      */
-    public static function createFromResponse(ResponseInterface $response): Rates
+    public static function createFromResponse(ResponseInterface $response): TimeSeriesRates
     {
         try {
             $responseArray = $response->toArray();
@@ -37,12 +37,12 @@ final class Rates implements ResponseObjectInterface
 
             return new self(
                 CurrencyCode::from($responseArray['base']),
-                new \DateTimeImmutable($responseArray['date']),
-                $rates,
-                $responseArray['historical'] ?: false
+                new \DateTimeImmutable($responseArray['start_date']),
+                new \DateTimeImmutable($responseArray['end_date']),
+                $rates
             );
         } catch (\Throwable $e) {
-            throw RequestServiceException::createInResponseContext('Rates', $e);
+            throw RequestServiceException::createInResponseContext('TimeSeriesRates', $e);
         }
     }
 
@@ -51,9 +51,14 @@ final class Rates implements ResponseObjectInterface
         return $this->baseCurrency;
     }
 
-    public function getUpdatedDate(): \DateTimeImmutable
+    public function getStartDate(): \DateTimeImmutable
     {
-        return $this->updatedDate;
+        return $this->startDate;
+    }
+
+    public function getEndDate(): \DateTimeImmutable
+    {
+        return $this->endDate;
     }
 
     /**
@@ -73,10 +78,5 @@ final class Rates implements ResponseObjectInterface
         }
 
         return null;
-    }
-
-    public function isHistorical(): bool
-    {
-        return $this->historical;
     }
 }

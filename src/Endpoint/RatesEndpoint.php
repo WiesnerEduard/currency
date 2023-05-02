@@ -10,6 +10,7 @@ use Wiesner\Currency\Service\Request\QueryParameters;
 use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\Rates;
+use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
 
 class RatesEndpoint
 {
@@ -58,6 +59,35 @@ class RatesEndpoint
     public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
     {
         return $this->requestService->getHistoricalRates($toDate, $this->createQueryParameters($base, $symbols, $amount, $places, $source), true);
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
+     */
+    public function getTimeSeriesRates(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): TimeSeriesRates
+    {
+        return $this->requestService->getTimeSeriesRates(
+            $this->createQueryParameters($base, $symbols, $amount, $places, $source)
+                ->add('start_date', $startDate->format('Y-m-d'))
+                ->add('end_date', $endDate->format('Y-m-d'))
+        );
+    }
+
+    /**
+     * @param CurrencyCode[] $symbols
+     *
+     * @throws RequestServiceException
+     */
+    public function getTimeSeriesRatesAsArray(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base = null, array $symbols = null, int $amount = null, int $places = null, BankSource $source = null): array
+    {
+        return $this->requestService->getTimeSeriesRates(
+            $this->createQueryParameters($base, $symbols, $amount, $places, $source)
+                ->add('start_date', $startDate->format('Y-m-d'))
+                ->add('end_date', $endDate->format('Y-m-d')),
+            true
+        );
     }
 
     /**

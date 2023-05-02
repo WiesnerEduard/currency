@@ -11,10 +11,12 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\Server;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 use Wiesner\Currency\Service\Request\Response\Rates;
+use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
 
 class RequestService
 {
     private const LATEST_PATH = 'latest';
+    private const TIME_SERIES_PATH = 'timeseries';
     private const CONVERT_PATH = 'convert';
 
     public function __construct(
@@ -65,6 +67,22 @@ class RequestService
         }
 
         return Rates::createFromResponse($this->makeRequest($toDate->format('Y-m-d'), $parameters));
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getTimeSeriesRates(QueryParameters $parameters = null, bool $rawResponse = false): TimeSeriesRates|array
+    {
+        if ($rawResponse) {
+            try {
+                $this->makeRequest(self::TIME_SERIES_PATH, $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getConvertCurrency', $e);
+            }
+        }
+
+        return TimeSeriesRates::createFromResponse($this->makeRequest(self::TIME_SERIES_PATH, $parameters));
     }
 
     /**
