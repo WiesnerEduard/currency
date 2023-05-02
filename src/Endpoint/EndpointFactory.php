@@ -26,6 +26,11 @@ class EndpointFactory
         return new ConvertCurrencyEndpoint(static::createRequestService($server), $source);
     }
 
+    public static function VatRatesEndpoint(Server $server = self::DEFAULT_SERVER): VatRatesEndpoint
+    {
+        return new VatRatesEndpoint(static::createRequestService($server));
+    }
+
     private static function createRequestService(Server $server): RequestService
     {
         return new RequestService($server, HttpClient::create());
