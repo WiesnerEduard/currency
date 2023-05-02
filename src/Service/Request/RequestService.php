@@ -9,11 +9,13 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\Server;
+use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 use Wiesner\Currency\Service\Request\Response\LatestRates;
 
 class RequestService
 {
     private const LATEST_PATH = 'latest';
+    private const CONVERT_PATH = 'convert';
 
     public function __construct(
         private readonly Server $server,
@@ -47,5 +49,21 @@ class RequestService
         }
 
         return LatestRates::createFromResponse($this->makeRequest(self::LATEST_PATH, $parameters));
+    }
+
+    /**
+     * @throws RequestServiceException
+     */
+    public function getConvertCurrency(QueryParameters $parameters = null, bool $rawResponse = false): ConvertCurrency|array
+    {
+        if ($rawResponse) {
+            try {
+                return $this->makeRequest(self::CONVERT_PATH, $parameters)->toArray();
+            } catch (ExceptionInterface $e) {
+                throw RequestServiceException::create('getConvertCurrency', $e);
+            }
+        }
+
+        return ConvertCurrency::createFromResponse($this->makeRequest(self::CONVERT_PATH, $parameters));
     }
 }

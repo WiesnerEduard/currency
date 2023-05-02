@@ -9,7 +9,7 @@ use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
-final class LatestRates
+final class LatestRates implements ResponseObjectInterface
 {
     /**
      * @param Rate[] $rates
@@ -24,7 +24,7 @@ final class LatestRates
     /**
      * @throws RequestServiceException
      */
-    public static function createFromResponse(ResponseInterface $response): self
+    public static function createFromResponse(ResponseInterface $response): LatestRates
     {
         try {
             $responseArray = $response->toArray();

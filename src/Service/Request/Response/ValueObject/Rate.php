@@ -10,7 +10,7 @@ class Rate
 {
     public function __construct(
         private readonly CurrencyCode $currencyCode,
-        private readonly float $rate
+        private readonly float $value
     ) {
     }
 
@@ -19,8 +19,8 @@ class Rate
         return $this->currencyCode;
     }
 
-    public function getRate(): float
+    public function getValue(): float
     {
-        return $this->rate;
+        return $this->value;
     }
 }

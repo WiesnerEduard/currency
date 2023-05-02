@@ -12,9 +12,18 @@ use Wiesner\Currency\Service\Request\RequestService;
 
 class EndpointFactory
 {
-    public static function latestEndpoint(Server $server = Server::EuCentral, CurrencyCode $defaultCurrency = CurrencyCode::Eur, BankSource $source = BankSource::EuropeanCentralBank): LatestEndpoint
+    public const DEFAULT_SERVER = Server::EuCentral;
+    public const DEFAULT_CURRENCY = CurrencyCode::Eur;
+    public const DEFAULT_BANK_SOURCE = BankSource::EuropeanCentralBank;
+
+    public static function latestEndpoint(Server $server = self::DEFAULT_SERVER, CurrencyCode $defaultCurrency = self::DEFAULT_CURRENCY, BankSource $source = self::DEFAULT_BANK_SOURCE): LatestEndpoint
     {
         return new LatestEndpoint(static::createRequestService($server), $defaultCurrency, $source);
+    }
+
+    public static function ConvertCurrencyEndpoint(Server $server = self::DEFAULT_SERVER, BankSource $source = self::DEFAULT_BANK_SOURCE): ConvertCurrencyEndpoint
+    {
+        return new ConvertCurrencyEndpoint(static::createRequestService($server), $source);
     }
 
     private static function createRequestService(Server $server): RequestService
