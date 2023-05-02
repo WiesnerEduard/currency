@@ -15,6 +15,15 @@ use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
 use Wiesner\Currency\Service\Request\Response\ValueObject\FluctuationRate;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
+/**
+ * RatesEndpoint PHP Class, which provides methods to retrieve currency exchange rates.
+ *
+ * The RatesEndpoint class serves as a central repository for accessing relevant and up-to-date information about currency rates across multiple currencies.
+ * This class provides a reliable and efficient way to retrieve and compare currency rates from various bank sources, helping users to make informed decisions about currency conversions.
+ * RatesEndpoint class also offers historical data, allowing users to view and analyze past trends in currency exchange rates.
+ * This feature can be particularly useful for businesses or individuals who need to track currency fluctuations over time,
+ * such as when making long-term financial plans or analyzing historical trends.
+ */
 class RatesEndpoint
 {
     public function __construct(
@@ -25,8 +34,15 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve actual currency exchange rates.
      *
+     * @param CurrencyCode $base
+     * @param CurrencyCode[] $symbols
+     * @param float $amount
+     * @param int $places
+     * @param BankSource $source
+     *
+     * @return Rates
      * @throws RequestServiceException
      */
     public function getRates(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
