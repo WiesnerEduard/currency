@@ -23,6 +23,8 @@ use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
  * RatesEndpoint class also offers historical data, allowing users to view and analyze past trends in currency exchange rates.
  * This feature can be particularly useful for businesses or individuals who need to track currency fluctuations over time,
  * such as when making long-term financial plans or analyzing historical trends.
+ *
+ * @api
  */
 class RatesEndpoint
 {
@@ -36,14 +38,18 @@ class RatesEndpoint
     /**
      * Retrieve actual currency exchange rates.
      *
-     * @param CurrencyCode $base
-     * @param CurrencyCode[] $symbols
-     * @param float $amount
-     * @param int $places
-     * @param BankSource $source
+     * Latest endpoint will return exchange rate data updated on daily basis.
      *
-     * @return Rates
+     * @param CurrencyCode|null   $base    currency used to calculate rates from
+     * @param CurrencyCode[]|null $symbols array of currencies used to filter response
+     * @param float|null          $amount  the amount to be converted from base currency
+     * @param int|null            $places  round numbers to decimal place
+     * @param BankSource|null     $source  source institution that provide rates
+     *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
      */
     public function getRates(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
@@ -51,9 +57,20 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve actual currency exchange rates as array.
+     *
+     * Latest endpoint will return exchange rate data updated on daily basis.
+     *
+     * @param CurrencyCode|null   $base    currency used to calculate rates from
+     * @param CurrencyCode[]|null $symbols array of currencies used to filter response
+     * @param float|null          $amount  the amount to be converted from base currency
+     * @param int|null            $places  round numbers to decimal place
+     * @param BankSource|null     $source  source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
      */
     public function getRatesAsArray(CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -61,7 +78,19 @@ class RatesEndpoint
     }
 
     /**
+     * Retrieve actual currency exchange rate for single currency.
+     *
+     * Latest endpoint will return exchange rate data updated on daily basis.
+     *
+     * @param CurrencyCode    $base   currency used to calculate rate from
+     * @param CurrencyCode    $to     currency used to calculate rate to
+     * @param float|null      $amount the amount to be converted from base currency
+     * @param int|null        $places round numbers to decimal place
+     * @param BankSource|null $source source institution that provide rates
+     *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultBankSource
      */
     public function getRate(CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
@@ -69,9 +98,21 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve historical currency exchange rates.
+     *
+     * Historical rates are available for most currencies all the way back to the year of 1999.
+     *
+     * @param \DateTimeImmutable  $toDate  rates valid to date
+     * @param CurrencyCode|null   $base    currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols array of currencies used to filter response
+     * @param float|null          $amount  the amount to be converted from base currency
+     * @param int|null            $places  round numbers to decimal place
+     * @param BankSource|null     $source  source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
      */
     public function getHistoricalRates(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): Rates
     {
@@ -79,9 +120,21 @@ class RatesEndpoint
     }
 
     /**
-     * @param CurrencyCode[] $symbols
+     * Retrieve historical currency exchange rates as array.
+     *
+     * Historical rates are available for most currencies all the way back to the year of 1999.
+     *
+     * @param \DateTimeImmutable  $toDate  rates valid to date
+     * @param CurrencyCode|null   $base    currency used to calculate rate from
+     * @param CurrencyCode[]|null $symbols array of currencies used to filter response
+     * @param float|null          $amount  the amount to be converted from base currency
+     * @param int|null            $places  round numbers to decimal place
+     * @param BankSource|null     $source  source institution that provide rates
      *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultCurrency
+     * @uses self::$defaultBankSource
      */
     public function getHistoricalRatesAsArray(\DateTimeImmutable $toDate, CurrencyCode $base = null, array $symbols = null, float $amount = null, int $places = null, BankSource $source = null): array
     {
@@ -89,7 +142,20 @@ class RatesEndpoint
     }
 
     /**
+     * Retrieve historical currency exchange rate for single currency.
+     *
+     * Historical rates are available for most currencies all the way back to the year of 1999.
+     *
+     * @param \DateTimeImmutable $toDate rates valid to date
+     * @param CurrencyCode       $base   currency used to calculate rate from
+     * @param CurrencyCode       $to     currency used to calculate rate to
+     * @param float|null         $amount the amount to be converted from base currency
+     * @param int|null           $places round numbers to decimal place
+     * @param BankSource|null    $source source institution that provide rates
+     *
      * @throws RequestServiceException
+     *
+     * @uses self::$defaultBankSource
      */
     public function getHistoricalRate(\DateTimeImmutable $toDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
