@@ -11,6 +11,11 @@ use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 use Wiesner\Currency\Service\Request\Response\ValueObject\ValueAddedTaxRate;
 
+/**
+ * VatRatesEndpoint PHP Class, which provides methods to retrieve information about VAT Rates in various countries.
+ *
+ * It provides methods, to get standard, reduced, super-reduced and parking ValueAddedTax Rates.
+ */
 class VatRatesEndpoint
 {
     public function __construct(
@@ -19,7 +24,9 @@ class VatRatesEndpoint
     }
 
     /**
-     * @param CountryCode[] $countries
+     * Get VAT Rates for countries from European Union.
+     *
+     * @param CountryCode[] $countries array of countries used to filter response
      *
      * @throws RequestServiceException
      */
@@ -29,7 +36,9 @@ class VatRatesEndpoint
     }
 
     /**
-     * @param CountryCode[] $countries
+     * Get VAT Rates for countries from European Union as array.
+     *
+     * @param CountryCode[] $countries array of countries used to filter response
      *
      * @throws RequestServiceException
      */
@@ -39,6 +48,10 @@ class VatRatesEndpoint
     }
 
     /**
+     * Get VAT Rates for specific country from European Union.
+     *
+     * @param CountryCode $countryCode source country of VAT
+     *
      * @throws RequestServiceException
      */
     public function getEuropeanUnionVatRate(CountryCode $countryCode): ValueAddedTaxRate
@@ -48,6 +61,8 @@ class VatRatesEndpoint
 
     /**
      * @param CountryCode[] $symbols
+     *
+     * @internal This method is not covered by the backward compatibility promise for wiesner/currency
      */
     protected function createQueryParameters(array $symbols = null): QueryParameters
     {

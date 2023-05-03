@@ -11,6 +11,9 @@ use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 
+/**
+ * ConvertCurrencyEndpoint PHP Class, which provides methods to convert currencies.
+ */
 class ConvertCurrencyEndpoint
 {
     public function __construct(
@@ -20,6 +23,15 @@ class ConvertCurrencyEndpoint
     }
 
     /**
+     * Convert currency from one to another.
+     *
+     * @param CurrencyCode            $from   source currency used to convert from
+     * @param CurrencyCode            $to     destination currency used to convert to
+     * @param float|null              $amount teh amount of source currency
+     * @param \DateTimeImmutable|null $toDate date of rates used to calculate result
+     * @param int|null                $places round numbers to decimal place
+     * @param BankSource|null         $source source institution that provide rates
+     *
      * @throws RequestServiceException
      */
     public function convert(CurrencyCode $from, CurrencyCode $to, float $amount = null, \DateTimeImmutable $toDate = null, int $places = null, BankSource $source = null): ConvertCurrency
@@ -28,6 +40,15 @@ class ConvertCurrencyEndpoint
     }
 
     /**
+     * Convert currency from one to another and return result as array.
+     *
+     * @param CurrencyCode            $from   source currency used to convert from
+     * @param CurrencyCode            $to     destination currency used to convert to
+     * @param float|null              $amount teh amount of source currency
+     * @param \DateTimeImmutable|null $toDate date of rates used to calculate result
+     * @param int|null                $places round numbers to decimal place
+     * @param BankSource|null         $source source institution that provide rates
+     *
      * @throws RequestServiceException
      */
     public function convertAsArray(CurrencyCode $from, CurrencyCode $to, float $amount = null, \DateTimeImmutable $toDate = null, int $places = null, BankSource $source = null): array
@@ -35,6 +56,9 @@ class ConvertCurrencyEndpoint
         return $this->requestService->getConvertCurrency($this->creteQueryParameters($from, $to, $amount, $toDate, $places, $source), true);
     }
 
+    /**
+     * @internal This method is not covered by the backward compatibility promise for wiesner/currency
+     */
     protected function creteQueryParameters(CurrencyCode $from, CurrencyCode $to, float $amount = null, \DateTimeImmutable $toDate = null, int $places = null, BankSource $source = null): QueryParameters
     {
         return (new QueryParameters())
