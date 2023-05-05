@@ -77,18 +77,19 @@ final class ApplicationConfiguration
 
     public function useSystemCache(string $namespace = 'currency', int $defaultLifetime = 0, string $version = '', LoggerInterface $logger = null): self
     {
+        $dir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.$namespace;
         $adapter = AbstractAdapter::createSystemCache(
             namespace: $namespace,
             defaultLifetime: $defaultLifetime,
             version: $version,
-            directory: $namespace,
+            directory: $dir,
             logger: $logger
         );
 
         if ($adapter instanceof CacheInterface) {
             $this->cache = $adapter;
         } else {
-            $this->cache = new FilesystemAdapter($namespace, $defaultLifetime, $namespace);
+            $this->cache = new FilesystemAdapter($namespace, $defaultLifetime, $dir);
         }
 
         return $this;
