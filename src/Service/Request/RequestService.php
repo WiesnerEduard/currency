@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request;
 
-use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\Enum\Server;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
@@ -16,7 +13,7 @@ use Wiesner\Currency\Service\Request\Response\Rates;
 use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
 use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 
-class RequestService
+class RequestService implements RequestServiceInterface
 {
     private const LATEST_PATH = 'latest';
     private const TIME_SERIES_PATH = 'timeseries';
@@ -33,12 +30,12 @@ class RequestService
     /**
      * @throws RequestServiceException
      */
-    public function makeRequest(string $path = '', QueryParameters $parameters = null): ResponseInterface
+    public function makeRequest(string $path = '', QueryParameters $parameters = null): array
     {
         try {
-            return $this->client->request('GET', sprintf('%s/%s', $this->server->value, $path), $parameters?->getQuery());
-        } catch (TransportExceptionInterface $e) {
-            throw RequestServiceException::create('makeRequest', $e);
+            return $this->client->request('GET', sprintf('%s/%s', $this->server->value, $path), null === $parameters ? [] : $parameters->getQuery())->toArray();
+        } catch (\Throwable $e) {
+            throw RequestServiceException::create($this, __FUNCTION__, $e);
         }
     }
 
@@ -48,14 +45,14 @@ class RequestService
     public function getLatestRates(QueryParameters $parameters = null, bool $rawResponse = false): Rates|array
     {
         if ($rawResponse) {
-            try {
-                return $this->makeRequest(self::LATEST_PATH, $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getLatestRates', $e);
-            }
+            return $this->makeRequest(self::LATEST_PATH, $parameters);
         }
 
-        return Rates::createFromResponse($this->makeRequest(self::LATEST_PATH, $parameters));
+        try {
+            return Rates::createFromArray($this->makeRequest(self::LATEST_PATH, $parameters));
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(Rates::class, $e);
+        }
     }
 
     /**
@@ -64,14 +61,14 @@ class RequestService
     public function getHistoricalRates(\DateTimeImmutable $toDate, QueryParameters $parameters = null, bool $rawResponse = false): Rates|array
     {
         if ($rawResponse) {
-            try {
-                $this->makeRequest($toDate->format('Y-m-d'), $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getConvertCurrency', $e);
-            }
+            $this->makeRequest($toDate->format('Y-m-d'), $parameters);
         }
 
-        return Rates::createFromResponse($this->makeRequest($toDate->format('Y-m-d'), $parameters));
+        try {
+            return Rates::createFromArray($this->makeRequest($toDate->format('Y-m-d'), $parameters));
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(Rates::class, $e);
+        }
     }
 
     /**
@@ -84,14 +81,14 @@ class RequestService
             ->add('end_date', $endDate->format('Y-m-d'));
 
         if ($rawResponse) {
-            try {
-                $this->makeRequest(self::TIME_SERIES_PATH, $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getConvertCurrency', $e);
-            }
+            $this->makeRequest(self::TIME_SERIES_PATH, $parameters);
         }
 
-        return TimeSeriesRates::createFromResponse($this->makeRequest(self::TIME_SERIES_PATH, $parameters));
+        try {
+            return TimeSeriesRates::createFromArray($this->makeRequest(self::TIME_SERIES_PATH, $parameters));
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(TimeSeriesRates::class, $e);
+        }
     }
 
     /**
@@ -105,14 +102,14 @@ class RequestService
             ->add('end_date', $endDate->format('Y-m-d'));
 
         if ($rawResponse) {
-            try {
-                $this->makeRequest(self::FLUCTUATION_PATH, $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getFluctuationRates', $e);
-            }
+            $this->makeRequest(self::FLUCTUATION_PATH, $parameters);
         }
 
-        return FluctuationRates::createFromResponseAndBaseCurrency($this->makeRequest(self::FLUCTUATION_PATH, $parameters), $baseCurrency);
+        try {
+            return FluctuationRates::createFromArrayAndCurrency($this->makeRequest(self::FLUCTUATION_PATH, $parameters), $baseCurrency);
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(FluctuationRates::class, $e);
+        }
     }
 
     /**
@@ -121,14 +118,14 @@ class RequestService
     public function getConvertCurrency(QueryParameters $parameters = null, bool $rawResponse = false): ConvertCurrency|array
     {
         if ($rawResponse) {
-            try {
-                return $this->makeRequest(self::CONVERT_PATH, $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getConvertCurrency', $e);
-            }
+            return $this->makeRequest(self::CONVERT_PATH, $parameters);
         }
 
-        return ConvertCurrency::createFromResponse($this->makeRequest(self::CONVERT_PATH, $parameters));
+        try {
+            return ConvertCurrency::createFromArray($this->makeRequest(self::CONVERT_PATH, $parameters));
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(ConvertCurrency::class, $e);
+        }
     }
 
     /**
@@ -137,13 +134,13 @@ class RequestService
     public function getValueAddedTaxRates(QueryParameters $parameters = null, bool $rawResponse = false): ValueAddedTaxRates|array
     {
         if ($rawResponse) {
-            try {
-                return $this->makeRequest(self::VAT_RATES_PATH, $parameters)->toArray();
-            } catch (ExceptionInterface $e) {
-                throw RequestServiceException::create('getConvertCurrency', $e);
-            }
+            return $this->makeRequest(self::VAT_RATES_PATH, $parameters);
         }
 
-        return ValueAddedTaxRates::createFromResponse($this->makeRequest(self::VAT_RATES_PATH, $parameters));
+        try {
+            return ValueAddedTaxRates::createFromArray($this->makeRequest(self::VAT_RATES_PATH, $parameters));
+        } catch (\Throwable $e) {
+            throw RequestServiceException::createInResponseContext(ValueAddedTaxRates::class, $e);
+        }
     }
 }

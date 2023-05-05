@@ -6,8 +6,8 @@ namespace Wiesner\Currency\Endpoint;
 
 use Wiesner\Currency\Service\Request\Enum\CountryCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
-use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
+use Wiesner\Currency\Service\Request\RequestServiceInterface;
 use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 use Wiesner\Currency\Service\Request\Response\ValueObject\ValueAddedTaxRate;
 
@@ -19,7 +19,7 @@ use Wiesner\Currency\Service\Request\Response\ValueObject\ValueAddedTaxRate;
 class VatRatesEndpoint
 {
     public function __construct(
-        private readonly RequestService $requestService
+        private readonly RequestServiceInterface $requestService
     ) {
     }
 

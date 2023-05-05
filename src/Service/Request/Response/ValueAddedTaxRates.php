@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request\Response;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CountryCode;
-use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\ValueAddedTaxRate;
 
 final class ValueAddedTaxRates
@@ -20,31 +18,25 @@ final class ValueAddedTaxRates
     }
 
     /**
-     * @throws RequestServiceException
+     * @throws \InvalidArgumentException
      */
-    public static function createFromResponse(ResponseInterface $response): ValueAddedTaxRates
+    public static function createFromArray(array $responseArray): ValueAddedTaxRates
     {
-        try {
-            $ratesResponse = $response->toArray()['rates'];
-
-            $taxRates = [];
-
-            foreach ($ratesResponse as $countryCode => $rateResponse) {
-                $taxRates[] = new ValueAddedTaxRate(
-                    CountryCode::from($countryCode),
-                    $rateResponse['standard_rate'],
-                    $rateResponse['reduced_rates'],
-                    $rateResponse['super_reduced_rates'],
-                    $rateResponse['parking_rates']
-                );
-            }
-
-            return new self($taxRates);
-
-
-        } catch (\Throwable $e) {
-            throw RequestServiceException::createInResponseContext('ValueAddedTaxRates', $e);
+        foreach ($responseArray['rates'] as $countryCode => $rateResponse) {
+            $taxRates[] = new ValueAddedTaxRate(
+                CountryCode::from($countryCode),
+                $rateResponse['standard_rate'],
+                $rateResponse['reduced_rates'],
+                $rateResponse['super_reduced_rates'],
+                $rateResponse['parking_rates']
+            );
         }
+
+        if (!isset($taxRates)) {
+            throw new \InvalidArgumentException(sprintf('There are not %s in array parameter of %s method in %s class.', 'rates', __FUNCTION__, self::class));
+        }
+
+        return new self($taxRates);
     }
 
     /**

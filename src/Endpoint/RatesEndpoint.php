@@ -7,8 +7,8 @@ namespace Wiesner\Currency\Endpoint;
 use Wiesner\Currency\Service\Request\Enum\BankSource;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
-use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
+use Wiesner\Currency\Service\Request\RequestServiceInterface;
 use Wiesner\Currency\Service\Request\Response\FluctuationRates;
 use Wiesner\Currency\Service\Request\Response\Rates;
 use Wiesner\Currency\Service\Request\Response\TimeSeriesRates;
@@ -27,7 +27,7 @@ use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 class RatesEndpoint
 {
     public function __construct(
-        private readonly RequestService $requestService,
+        private readonly RequestServiceInterface $requestService,
         private readonly CurrencyCode $defaultCurrency,
         private readonly BankSource $defaultBankSource,
     ) {

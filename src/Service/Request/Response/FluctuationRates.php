@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request\Response;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
-use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\FluctuationRate;
 
 final class FluctuationRates
@@ -23,33 +21,28 @@ final class FluctuationRates
     }
 
     /**
-     * @throws RequestServiceException
+     * @throws \Exception
      */
-    public static function createFromResponseAndBaseCurrency(ResponseInterface $response, CurrencyCode $baseCurrency): FluctuationRates
+    public static function createFromArrayAndCurrency(array $responseArray, CurrencyCode $baseCurrency): FluctuationRates
     {
-        try {
-            $responseArray = $response->toArray();
-            $rates = [];
+        $rates = [];
 
-            foreach ($responseArray['rates'] as $currency => $fluctuationRate) {
-                $rates[] = new FluctuationRate(
-                    currencyCode: CurrencyCode::from($currency),
-                    startValue: $fluctuationRate['start_rate'],
-                    endValue: $fluctuationRate['end_rate'],
-                    changeValue: $fluctuationRate['change'],
-                    changePercentageValue: $fluctuationRate['change_pct'],
-                );
-            }
-
-            return new self(
-                baseCurrency: $baseCurrency,
-                startDate: new \DateTimeImmutable($responseArray['start_date']),
-                endDate: new \DateTimeImmutable($responseArray['end_date']),
-                fluctuationRates: $rates
+        foreach ($responseArray['rates'] as $currency => $fluctuationRate) {
+            $rates[] = new FluctuationRate(
+                currencyCode: CurrencyCode::from($currency),
+                startValue: $fluctuationRate['start_rate'],
+                endValue: $fluctuationRate['end_rate'],
+                changeValue: $fluctuationRate['change'],
+                changePercentageValue: $fluctuationRate['change_pct'],
             );
-        } catch (\Throwable $e) {
-            throw RequestServiceException::createInResponseContext('FluctuationRates', $e);
         }
+
+        return new self(
+            baseCurrency: $baseCurrency,
+            startDate: new \DateTimeImmutable($responseArray['start_date']),
+            endDate: new \DateTimeImmutable($responseArray['end_date']),
+            fluctuationRates: $rates
+        );
     }
 
     public function getBaseCurrency(): CurrencyCode

@@ -7,8 +7,8 @@ namespace Wiesner\Currency\Endpoint;
 use Wiesner\Currency\Service\Request\Enum\BankSource;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 use Wiesner\Currency\Service\Request\QueryParameters;
-use Wiesner\Currency\Service\Request\RequestService;
 use Wiesner\Currency\Service\Request\RequestServiceException;
+use Wiesner\Currency\Service\Request\RequestServiceInterface;
 use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 
 /**
@@ -17,7 +17,7 @@ use Wiesner\Currency\Service\Request\Response\ConvertCurrency;
 class ConvertCurrencyEndpoint
 {
     public function __construct(
-        private readonly RequestService $requestService,
+        private readonly RequestServiceInterface $requestService,
         private readonly BankSource $defaultBankSource
     ) {
     }

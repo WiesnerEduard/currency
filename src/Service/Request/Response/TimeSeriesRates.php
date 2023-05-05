@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Wiesner\Currency\Service\Request\Response;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
-use Wiesner\Currency\Service\Request\RequestServiceException;
 use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
 final class TimeSeriesRates
@@ -23,27 +21,22 @@ final class TimeSeriesRates
     }
 
     /**
-     * @throws RequestServiceException
+     * @throws \Exception
      */
-    public static function createFromResponse(ResponseInterface $response): TimeSeriesRates
+    public static function createFromArray(array $responseArray): TimeSeriesRates
     {
-        try {
-            $responseArray = $response->toArray();
-            $rates = [];
+        $rates = [];
 
-            foreach ($responseArray['rates'] as $currency => $rate) {
-                $rates[] = new Rate(CurrencyCode::from($currency), $rate);
-            }
-
-            return new self(
-                CurrencyCode::from($responseArray['base']),
-                new \DateTimeImmutable($responseArray['start_date']),
-                new \DateTimeImmutable($responseArray['end_date']),
-                $rates
-            );
-        } catch (\Throwable $e) {
-            throw RequestServiceException::createInResponseContext('TimeSeriesRates', $e);
+        foreach ($responseArray['rates'] as $currency => $rate) {
+            $rates[] = new Rate(CurrencyCode::from($currency), $rate);
         }
+
+        return new self(
+            CurrencyCode::from($responseArray['base']),
+            new \DateTimeImmutable($responseArray['start_date']),
+            new \DateTimeImmutable($responseArray['end_date']),
+            $rates
+        );
     }
 
     public function getBaseCurrency(): CurrencyCode

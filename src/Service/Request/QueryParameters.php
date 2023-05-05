@@ -21,4 +21,13 @@ final class QueryParameters
     {
         return empty($this->params) ? [] : ['query' => $this->params];
     }
+
+    public function encode(string $prefix): string
+    {
+        foreach ($this->params as $key => $value) {
+            $prefix .= sprintf('&%s=%s', $key, $value);
+        }
+
+        return $prefix;
+    }
 }
