@@ -16,7 +16,7 @@ use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 
 class CachedRequestService implements RequestServiceInterface
 {
-    private const CACHE_EXPIRATION_TIME_IN_SECONDS = 3;
+    private const CACHE_EXPIRATION_TIME_IN_SECONDS = 3600;
 
     public function __construct(
         private readonly CacheInterface $cache,
