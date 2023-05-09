@@ -16,7 +16,7 @@ use Wiesner\Currency\Service\Request\Response\ValueAddedTaxRates;
 
 class CachedRequestService implements RequestServiceInterface
 {
-    private const CACHE_EXPIRATION_TIME_IN_SECONDS = 3600;
+    private const CACHE_EXPIRATION_TIME_IN_SECONDS = 1;
 
     public function __construct(
         private readonly CacheInterface $cache,
@@ -136,13 +136,15 @@ class CachedRequestService implements RequestServiceInterface
 
             $key = $parameters->encode($method) ?? $method;
 
+            $args[] = true;
+
             $data = $this->cache->get($key, function (ItemInterface $item) use ($method, $args) {
                 $item->expiresAfter(self::CACHE_EXPIRATION_TIME_IN_SECONDS);
 
-                return $this->requestService->$method(...$args, rawResponse: true);
+                return $this->requestService->$method(...$args);
             });
 
-            return ['key' => $key, 'data' => $data, 'test'];
+            return ['key' => $key, 'data' => $data];
         } catch (\Throwable $e) {
             throw RequestServiceException::create($this, __FUNCTION__, $e);
         }

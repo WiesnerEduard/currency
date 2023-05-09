@@ -25,24 +25,18 @@ final class FluctuationRates
      */
     public static function createFromArrayAndCurrency(array $responseArray, CurrencyCode $baseCurrency): FluctuationRates
     {
-        $rates = [];
+        $startDate = new \DateTimeImmutable($responseArray['start_date']);
+        $endDate = new \DateTimeImmutable($responseArray['end_date']);
+        $baseAmount = (float) $responseArray['rates'][$baseCurrency->value]['start_rate'];
 
+        $rates = [];
         foreach ($responseArray['rates'] as $currency => $fluctuationRate) {
-            $rates[] = new FluctuationRate(
-                currencyCode: CurrencyCode::from($currency),
-                startValue: $fluctuationRate['start_rate'],
-                endValue: $fluctuationRate['end_rate'],
-                changeValue: $fluctuationRate['change'],
-                changePercentageValue: $fluctuationRate['change_pct'],
-            );
+            if ($currency !== $baseCurrency->value) {
+                $rates[] = new FluctuationRate($baseCurrency, CurrencyCode::from($currency), $startDate, $endDate, $baseAmount, (float) $fluctuationRate['start_rate'], (float) $fluctuationRate['end_rate'], (float) $fluctuationRate['change'], (float) $fluctuationRate['change_pct']);
+            }
         }
 
-        return new self(
-            baseCurrency: $baseCurrency,
-            startDate: new \DateTimeImmutable($responseArray['start_date']),
-            endDate: new \DateTimeImmutable($responseArray['end_date']),
-            fluctuationRates: $rates
-        );
+        return new self($baseCurrency, $startDate, $endDate, $rates);
     }
 
     public function getBaseCurrency(): CurrencyCode
@@ -71,7 +65,7 @@ final class FluctuationRates
     public function getFluctuationRate(CurrencyCode $currencyCode): ?FluctuationRate
     {
         foreach ($this->fluctuationRates as $rate) {
-            if ($rate->getCurrencyCode() === $currencyCode) {
+            if ($rate->getTargetCurrency() === $currencyCode) {
                 return $rate;
             }
         }

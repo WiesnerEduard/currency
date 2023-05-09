@@ -13,10 +13,7 @@ final class Rates
      * @param Rate[] $rates
      */
     private function __construct(
-        private readonly CurrencyCode $baseCurrency,
-        private readonly \DateTimeImmutable $updatedDate,
-        private readonly array $rates,
-        private readonly bool $historical
+        private readonly array $rates
     ) {
     }
 
@@ -26,41 +23,29 @@ final class Rates
     public static function createFromArray(array $responseArray): Rates
     {
         $rates = [];
+        $baseCurrency = CurrencyCode::from($responseArray['base']);
+        $baseAmount = (float) $responseArray['rates'][$responseArray['base']];
+        $date = new \DateTimeImmutable($responseArray['date']);
 
-        foreach ($responseArray['rates'] as $currency => $rate) {
-            $rates[] = new Rate(CurrencyCode::from($currency), $rate);
+        foreach ($responseArray['rates'] as $currency => $targetAmount) {
+            $rates[] = new Rate($date, $baseCurrency, CurrencyCode::from($currency), $baseAmount, (float) $targetAmount);
         }
 
-        return new self(
-            CurrencyCode::from($responseArray['base']),
-            new \DateTimeImmutable($responseArray['date']),
-            $rates,
-            array_key_exists('historical', $responseArray) ? $responseArray['historical'] : false
-        );
-    }
-
-    public function getBaseCurrency(): CurrencyCode
-    {
-        return $this->baseCurrency;
-    }
-
-    public function getUpdatedDate(): \DateTimeImmutable
-    {
-        return $this->updatedDate;
+        return new self($rates);
     }
 
     /**
      * @return Rate[]
      */
-    public function getAllRates(): array
+    public function getRates(): array
     {
         return $this->rates;
     }
 
-    public function getRate(CurrencyCode $currencyCode): ?Rate
+    public function getRateByCurrency(CurrencyCode $currencyCode): ?Rate
     {
         foreach ($this->rates as $rate) {
-            if ($rate->getCurrencyCode() === $currencyCode) {
+            if ($rate->getTargetCurrency() === $currencyCode) {
                 return $rate;
             }
         }
@@ -68,8 +53,5 @@ final class Rates
         return null;
     }
 
-    public function isHistorical(): bool
-    {
-        return $this->historical;
-    }
+
 }

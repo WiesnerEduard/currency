@@ -98,7 +98,7 @@ class RatesEndpoint
      */
     public function getRate(CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
-        return $this->getRates($base, [$to], $amount, $places, $source)->getRate($to);
+        return $this->getRates($base, [$base, $to], $amount, $places, $source)->getRateByCurrency($to);
     }
 
     /**
@@ -169,7 +169,7 @@ class RatesEndpoint
      */
     public function getHistoricalRate(\DateTimeImmutable $toDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
     {
-        return $this->getHistoricalRates($toDate, $base, [$to], $amount, $places, $source)->getRate($to);
+        return $this->getHistoricalRates($toDate, $base, [$base, $to], $amount, $places, $source)->getRateByCurrency($to);
     }
 
     /**
@@ -229,30 +229,6 @@ class RatesEndpoint
             parameters: $this->createQueryParameters($base, $symbols, $amount, $places, $source),
             rawResponse: true
         );
-    }
-
-    /**
-     * Retrieve timeseries currency exchange rate for single currency.
-     *
-     * Timeseries rate is for daily historical rate between two dates of your choice, with a maximum time frame of 366 days.
-     *
-     * @param \DateTimeImmutable $startDate the start date of your preferred timeframe
-     * @param \DateTimeImmutable $endDate   the end date of your preferred timeframe
-     * @param CurrencyCode       $base      currency used to calculate rate from
-     * @param CurrencyCode       $to        currency used to calculate rate to
-     * @param float|null         $amount    the amount to be converted from base currency
-     * @param int|null           $places    round numbers to decimal place
-     * @param BankSource|null    $source    source institution that provide rates
-     *
-     * @throws RequestServiceException
-     *
-     * @uses self::$defaultBankSource
-     *
-     * @api
-     */
-    public function getTimeSeriesRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): Rate
-    {
-        return $this->getTimeSeriesRates($startDate, $endDate, $base, [$to], $amount, $places, $source)->getRate($to);
     }
 
     /**
@@ -338,7 +314,7 @@ class RatesEndpoint
      */
     public function getFluctuationRate(\DateTimeImmutable $startDate, \DateTimeImmutable $endDate, CurrencyCode $base, CurrencyCode $to, float $amount = null, int $places = null, BankSource $source = null): FluctuationRate
     {
-        return $this->getFluctuationRates($startDate, $endDate, $base, [$to], $amount, $places, $source)->getFluctuationRate($to);
+        return $this->getFluctuationRates($startDate, $endDate, $base, [$base, $to], $amount, $places, $source)->getFluctuationRate($to);
     }
 
     /**

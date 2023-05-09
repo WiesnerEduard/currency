@@ -61,7 +61,7 @@ class RequestService implements RequestServiceInterface
     public function getHistoricalRates(\DateTimeImmutable $toDate, QueryParameters $parameters = null, bool $rawResponse = false): Rates|array
     {
         if ($rawResponse) {
-            $this->makeRequest($toDate->format('Y-m-d'), $parameters);
+            return $this->makeRequest($toDate->format('Y-m-d'), $parameters);
         }
 
         try {
@@ -81,7 +81,7 @@ class RequestService implements RequestServiceInterface
             ->add('end_date', $endDate->format('Y-m-d'));
 
         if ($rawResponse) {
-            $this->makeRequest(self::TIME_SERIES_PATH, $parameters);
+            return $this->makeRequest(self::TIME_SERIES_PATH, $parameters);
         }
 
         try {
@@ -102,7 +102,7 @@ class RequestService implements RequestServiceInterface
             ->add('end_date', $endDate->format('Y-m-d'));
 
         if ($rawResponse) {
-            $this->makeRequest(self::FLUCTUATION_PATH, $parameters);
+            return $this->makeRequest(self::FLUCTUATION_PATH, $parameters);
         }
 
         try {

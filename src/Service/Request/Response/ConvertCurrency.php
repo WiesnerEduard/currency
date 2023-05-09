@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace Wiesner\Currency\Service\Request\Response;
 
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
-use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 
 final class ConvertCurrency
 {
     private function __construct(
         private readonly CurrencyCode $from,
-        private readonly float $amount,
-        private readonly float $result,
-        private readonly Rate $rate,
-        private readonly \DateTimeImmutable $toDate,
-        private readonly bool $historical
+        private readonly CurrencyCode $to,
+        private readonly float $fromAmount,
+        private readonly float $toAmount,
+        private readonly \DateTimeImmutable $date,
     ) {
     }
 
@@ -26,11 +24,10 @@ final class ConvertCurrency
     {
         return new self(
             CurrencyCode::from($responseArray['query']['from']),
-            $responseArray['query']['amount'],
-            $responseArray['result'],
-            new Rate(CurrencyCode::from($responseArray['query']['to']), $responseArray['info']['rate']),
-            new \DateTimeImmutable($responseArray['date']),
-            $responseArray['historical']
+            CurrencyCode::from($responseArray['query']['to']),
+            (float) $responseArray['query']['amount'],
+            (float) $responseArray['result'],
+            new \DateTimeImmutable($responseArray['date'])
         );
     }
 
@@ -41,31 +38,21 @@ final class ConvertCurrency
 
     public function getTo(): CurrencyCode
     {
-        return $this->rate->getCurrencyCode();
+        return $this->to;
     }
 
-    public function getAmount(): float
+    public function getFromAmount(): float
     {
-        return $this->amount;
+        return $this->fromAmount;
     }
 
     public function getResult(): float
     {
-        return $this->result;
+        return $this->toAmount;
     }
 
-    public function getRate(): Rate
+    public function getDate(): \DateTimeImmutable
     {
-        return $this->rate;
-    }
-
-    public function getToDate(): \DateTimeImmutable
-    {
-        return $this->toDate;
-    }
-
-    public function isHistorical(): bool
-    {
-        return $this->historical;
+        return $this->date;
     }
 }

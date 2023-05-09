@@ -10,7 +10,7 @@ use Wiesner\Currency\Service\Request\Response\ValueObject\Rate;
 final class TimeSeriesRates
 {
     /**
-     * @param Rate[] $rates
+     * @param Rate[][] $rates
      */
     private function __construct(
         private readonly CurrencyCode $baseCurrency,
@@ -25,18 +25,28 @@ final class TimeSeriesRates
      */
     public static function createFromArray(array $responseArray): TimeSeriesRates
     {
-        $rates = [];
+        $ratesByDay = $responseArray['rates'];
+        $baseCurrency = CurrencyCode::from($responseArray['base']);
+        $firstRate = reset($responseArray['rates']);
 
-        foreach ($responseArray['rates'] as $currency => $rate) {
-            $rates[] = new Rate(CurrencyCode::from($currency), $rate);
+        if (false !== $firstRate) {
+            $baseAmount = (float) $firstRate[$responseArray['base']];
+        } else {
+            $baseAmount = 0.0;
         }
 
-        return new self(
-            CurrencyCode::from($responseArray['base']),
-            new \DateTimeImmutable($responseArray['start_date']),
-            new \DateTimeImmutable($responseArray['end_date']),
-            $rates
-        );
+        $result = [];
+
+        foreach ($ratesByDay as $date => $rates) {
+            $dateTime = new \DateTimeImmutable($date);
+            foreach ($rates as $currency => $amount) {
+                if ($currency !== $responseArray['base']) {
+                    $result[$date][] = new Rate($dateTime, $baseCurrency, CurrencyCode::from($currency), $baseAmount, (float) $amount);
+                }
+            }
+        }
+
+        return new self($baseCurrency, new \DateTimeImmutable($responseArray['start_date']), new \DateTimeImmutable($responseArray['end_date']), $result);
     }
 
     public function getBaseCurrency(): CurrencyCode
@@ -55,17 +65,27 @@ final class TimeSeriesRates
     }
 
     /**
-     * @return Rate[]
+     * @return Rate[][]
      */
-    public function getAllRates(): array
+    public function getRates(): array
     {
         return $this->rates;
     }
 
-    public function getRate(CurrencyCode $currencyCode): ?Rate
+    /**
+     * @return Rate[]
+     */
+    public function getRatesByDate(\DateTimeImmutable $date): array
     {
-        foreach ($this->rates as $rate) {
-            if ($rate->getCurrencyCode() === $currencyCode) {
+        $index = $date->format('Y-m-d');
+
+        return $this->rates[$index] ?? [];
+    }
+
+    public function getRateByDateAndCurrency(\DateTimeImmutable $date, CurrencyCode $currency): ?Rate
+    {
+        foreach ($this->getRatesByDate($date) as $rate) {
+            if ($rate->getTargetCurrency() === $currency) {
                 return $rate;
             }
         }

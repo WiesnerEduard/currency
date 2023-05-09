@@ -6,39 +6,80 @@ namespace Wiesner\Currency\Service\Request\Response\ValueObject;
 
 use Wiesner\Currency\Service\Request\Enum\CurrencyCode;
 
-class FluctuationRate
+class FluctuationRate implements \Stringable
 {
     public function __construct(
-        private readonly CurrencyCode $currencyCode,
-        private readonly float $startValue,
-        private readonly float $endValue,
-        private readonly float $changeValue,
-        private readonly float $changePercentageValue
+        private readonly CurrencyCode $baseCurrency,
+        private readonly CurrencyCode $targetCurrency,
+        private readonly \DateTimeImmutable $startDate,
+        private readonly \DateTimeImmutable $endDate,
+        private readonly float $baseAmount,
+        private readonly float $targetStartAmount,
+        private readonly float $targetEndAmount,
+        private readonly float $targetChange,
+        private readonly float $targetChangePercentage
     ) {
     }
 
-    public function getCurrencyCode(): CurrencyCode
+    public function getBaseCurrency(): CurrencyCode
     {
-        return $this->currencyCode;
+        return $this->baseCurrency;
     }
 
-    public function getStartValue(): float
+    public function getTargetCurrency(): CurrencyCode
     {
-        return $this->startValue;
+        return $this->targetCurrency;
     }
 
-    public function getEndValue(): float
+    public function getStartDate(): \DateTimeImmutable
     {
-        return $this->endValue;
+        return $this->startDate;
     }
 
-    public function getChangeValue(): float
+    public function getEndDate(): \DateTimeImmutable
     {
-        return $this->changeValue;
+        return $this->endDate;
     }
 
-    public function getChangePercentageValue(): float
+    public function getBaseAmount(): float
     {
-        return $this->changePercentageValue;
+        return $this->baseAmount;
+    }
+
+    public function getTargetStartAmount(): float
+    {
+        return $this->targetStartAmount;
+    }
+
+    public function getTargetEndAmount(): float
+    {
+        return $this->targetEndAmount;
+    }
+
+    public function getTargetChange(): float
+    {
+        return $this->targetChange;
+    }
+
+    public function getTargetChangePercentage(): float
+    {
+        return $this->targetChangePercentage;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s: %.2f%s = %.2f%s, %s: %.2f%s = %.2f%s',
+            $this->startDate->format('Y-m-d'),
+            $this->baseAmount,
+            $this->baseCurrency->value,
+            $this->targetStartAmount,
+            $this->targetCurrency->value,
+            $this->endDate->format('Y-m-d'),
+            $this->baseAmount,
+            $this->baseCurrency->value,
+            $this->targetEndAmount,
+            $this->targetCurrency->value
+        );
     }
 }
